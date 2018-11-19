@@ -2,13 +2,6 @@ defmodule Servy do
   require Logger
 
   def accept(port) do
-    # The options below mean:
-    #
-    # 1. `:binary` - receives data as binaries (instead of lists)
-    # 2. `packet: :response` - receives data response by response
-    # 3. `active: false` - blocks on `:gen_tcp.recv/2` until data is available
-    # 4. `reuseaddr: true` - allows us to reuse the address if the listener crashes
-    #
 
     case :gen_tcp.listen(port, [:binary, packet: :line, active: false, reuseaddr: true]) do
       {:ok, socket} ->
@@ -44,12 +37,12 @@ defmodule Servy do
   defp read_line(socket, lines) do
     case :gen_tcp.recv(socket, 0) do
       {:ok, line} ->
-        Logger.info("Received line: '#{line}'.")
+        result = "#{lines}#{line}"
         if !Regex.match?(~r/^[\r|\n|\r\n|\n\r]$/, line) do
-          read_line(socket, "#{lines}#{line}")
+          read_line(socket, result)
+        else
+          result
         end
-        Logger.info("Received all lines: #{lines}#{line}")
-        "#{lines}#{line}"
 
       {:error, reason} ->
         Logger.info("Closed for #{reason}.")
@@ -64,8 +57,7 @@ defmodule Servy do
   defp respond(data, socket) do
     Logger.info("Received: '#{data}'")
     response = Servy.Handler.handle(data)
+    Logger.info("Response: '#{response}'")
     :gen_tcp.send(socket, response)
   end
 end
-
-Servy.accept(8080)

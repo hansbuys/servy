@@ -1,8 +1,14 @@
 defmodule ServyTest do
   use ExUnit.Case
-  doctest Servy
+  require Logger
 
-  test "greets the world" do
-    assert Servy.hello() == :world
+  test "/ returns OK" do
+    port = 8082
+    HTTPoison.start()
+    server = spawn fn -> Servy.accept(port) end
+
+    {:ok, _} = :httpc.request('http://localhost:8082/')
+
+    Process.delete(server)
   end
 end
