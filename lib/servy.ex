@@ -59,5 +59,6 @@ defmodule Servy do
     response = Servy.Handler.handle(data)
     Logger.info("Response: '#{response}'")
     :gen_tcp.send(socket, response)
+    :gen_tcp.close socket
   end
 end

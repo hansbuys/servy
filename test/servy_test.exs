@@ -4,7 +4,6 @@ defmodule ServyTest do
 
   test "/ returns OK" do
     port = 8082
-    HTTPoison.start()
     server = spawn fn -> Servy.accept(port) end
 
     {:ok, _} = :httpc.request('http://localhost:8082/')
