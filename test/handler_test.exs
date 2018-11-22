@@ -3,7 +3,7 @@ defmodule Servy.HandlerTest do
 
   test "Responds with Detroits Sports teams" do
     request = """
-GET /wildthings HTTP/1.1
+GET / HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*

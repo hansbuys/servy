@@ -6,11 +6,17 @@ defmodule Servy.Handler do
     |> parse
     |> log
     |> route
-    |> format_response
+  end
+
+  defmodule Route do
+    defstruct method: "GET", path: "/"
   end
 
   def parse(request) do
-    %{method: parseMethod(request), path: parsePath(request), body: ""}
+    %Route {
+      method: parseMethod(request),
+      path: parsePath(request)
+    }
   end
 
   def parsePath(request) do
@@ -25,26 +31,29 @@ defmodule Servy.Handler do
     List.first(method)
   end
 
-  def log(conv) do
-    Logger.info("Called #{conv.method} at #{conv.path}")
-    conv
+  def log(%Route{} = route) do
+    Logger.info("Called #{route.method} at #{route.path}")
+    route
   end
 
-  def route(conv) do
-    %{
-      method: conv.method,
-      path: conv.path,
-      body: "Pistons, Tigers, RedWings"
-    }
-  end
+  def route(%Route{method: _, path: "/"}) do
+    body = "Pistons, Tigers, RedWings"
 
-  def format_response(conv) do
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
-    Content-Length: #{String.length(conv.body)}
+    Content-Length: #{String.length(body)}
 
-    #{conv.body}
+    #{body}
+    """
+  end
+
+  def route(%Route{method: _, path: _}) do
+    """
+    HTTP/1.1 404 Not Found
+    Content-Type: text/html
+    Content-Length: 0
+
     """
   end
 end
